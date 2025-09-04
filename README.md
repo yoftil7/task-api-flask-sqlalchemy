@@ -20,6 +20,16 @@ Flask: A lightweight web server framework.
 Flask-SQLAlchemy: Flask extension for easy SQLAlchemy integration.
 Marshmallow: An ORM/ODM/framework-agnostic library for converting complex objects to and from native Python datatypes.
 Werkzeug: A WSGI utility library used by Flask.
+Pytest: The testing framework used to validate the application.
+
+## Testing
+
+The project includes a comprehensive test suite built with `pytest`. Tests are configured to run in an isolated in-memory SQLite database, ensuring speed and reliability.
+
+**To run the tests, execute the following command from the project root:**
+
+```sh
+pytest -v
 
 ## Project Structure
 
@@ -31,10 +41,16 @@ Werkzeug: A WSGI utility library used by Flask.
 │ ├── routes.py # RESTful API endpoints (blueprint)
 │ ├── schemas.py # Marshmallow schemas for data validation and serialization
 │ └── templates/ # (Optional) HTML templates
+├── tests/
+│ ├── conftest.py # Pytest fixtures for test setup
+│ ├── test_health.py # Tests for the health endpoint
+│ └── test_task.py # Tests for the task CRUD endpoints
 ├── instance/
 │ └── tasks.db # SQLite database file (created by SQLAlchemy)
 ├── requirements.txt # Project dependencies
 └── run.py # Application entry point
+
+
 
 ## Getting Started
 
@@ -85,3 +101,4 @@ Response: 200 OK with the updated task.
 Delete a task
 Endpoint: DELETE /tasks/<int:task_id>
 Response: 204 No Content
+```

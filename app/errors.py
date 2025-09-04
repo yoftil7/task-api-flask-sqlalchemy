@@ -5,6 +5,7 @@ import sys, logging
 
 
 def handle_validation_error(err):
+    message = "Validation failed"
     current_app.logger.warning("Validation failed %s", err.messages)
     return (
         jsonify(
@@ -24,14 +25,14 @@ def handle_validation_error(err):
 def handle_http_exception(err):
     code = err.code
     name = err.name
+    message = (
+        err.description if hasattr(err, "description") and err.description else name
+    )
     if 400 <= code < 500:
         current_app.logger.warning("Client side error (%s): %s", code, message)
     elif code >= 500:
         current_app.logger.error("Server side error (%s): %s", code, message)
 
-    message = (
-        err.description if hasattr(err, "description") and err.description else name
-    )
     return (
         jsonify(
             {"error": {"code": code, "message": message, "type": name.replace(" ", "")}}
