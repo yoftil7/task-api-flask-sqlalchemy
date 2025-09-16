@@ -150,6 +150,41 @@ def test_pagination_second_page(auth_client, add_tasks):
     assert data["meta"]["has_prev"] is True
 
 
+def test_filter_task_by_completed(auth_client, add_tasks):
+    # Add a mix of completed and not completed
+    tasks = [
+        add_tasks(1)[0],  # Task 1 (default completed=False)
+    ]
+    tasks[0].completed = True  # mark one as completed
+
+    res = auth_client.get("/tasks?completed=true")
+    res.status_code == 200
+    data = res.get_json()
+    assert all(item["completed"] is True for item in data["items"])
+
+    # filter completed = False
+    res = auth_client.get("tasks?completed=false")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert all(item["completed"] is False for item in data["items"])
+
+
+def test_sort_tasks_by_description(auth_client, add_tasks):
+    add_tasks(3)  # Task 1, Task 2, Task 3
+
+    res = auth_client.get("tasks?sort_by=description&sort_order=asc")
+    assert res.status_code == 200
+    data = res.get_json()
+    descriptions = [item["description"] for item in data["items"]]
+    assert descriptions == sorted(descriptions)
+
+    res = auth_client.get("/tasks?sort_by=description&sort_order=desc")
+    assert res.status_code == 200
+    data = res.get_json()
+    descriptions = [item["description"] for item in data["items"]]
+    assert descriptions == sorted(descriptions, reverse=True)
+
+
 def test_pagination_invalid_params(auth_client):
     res = auth_client.get("/tasks?page=0&per_page=200")
     assert res.status_code == 400
