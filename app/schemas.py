@@ -9,6 +9,7 @@ from marshmallow import (
     validates_schema,
     EXCLUDE,
 )
+from .models import User
 
 FORBIDDEN_WORDS = ["shrek", "dummy"]
 
@@ -23,6 +24,10 @@ class TaskSchema(Schema):
         ],
     )
     completed = fields.Bool(required=False, load_default=False)
+    priority = fields.Int(required=False, allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+    user_id = fields.Int(dump_only=True)
 
     # validate against forbidden words
     @validates("description")
@@ -57,9 +62,30 @@ class TaskSchema(Schema):
         return data
 
 
-class PaginationSchema(Schema):
+class TaskFilterSchema(Schema):
     page = fields.Int(load_default=1, validate=validate.Range(min=1))
     per_page = fields.Int(load_default=10, validate=validate.Range(min=1, max=100))
+    completed = fields.Bool(load_default=None)  # optional filter
+    sort_by = fields.Str(
+        load_default="id",
+        validate=validate.OneOf(["id", "priority", "created_at", "description"]),
+    )
+    sort_order = fields.Str(
+        load_default="asc",
+        validate=validate.OneOf(["asc", "desc"]),
+    )
 
     class Meta:
         unkown = EXCLUDE
+
+
+class UserSchema(Schema):
+    id = fields.Int(dump_only=True)
+    username = fields.Str(required=True, validate=validate.Length(min=3))
+    password = fields.Str(
+        required=True, load_only=True, validate=validate.Length(min=6)
+    )  # dont give out password
+    role = fields.Str(dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
